@@ -1,6 +1,6 @@
 # HLSTube
 
-> On-demand HLS streams for YouTube URLs. For, uh, personal use.
+> On-demand HLS streams using youtube-dl. For, uh, personal use.
 
 ## Usage
 
