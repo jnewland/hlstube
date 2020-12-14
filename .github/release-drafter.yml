@@ -18,8 +18,8 @@ template: |
   
   ## Docker Images
 
-  [![docker](https://github.com/jnewland/hlstube/workflows/docker/badge.svg?branch=v$RESOLVED_VERSION)](https://github.com/jnewland/hlstube/actions?query=workflow%3Adocker+branch%3Av$RESOLVED_VERSION)
+  [![docker](https://github.com/urcomputeringpal/hlstube/workflows/docker/badge.svg?branch=v$RESOLVED_VERSION)](https://github.com/urcomputeringpal/hlstube/actions?query=workflow%3Adocker+branch%3Av$RESOLVED_VERSION)
 
   ```
-  ghcr.io/jnewland/hlstube:v$RESOLVED_VERSION
+  ghcr.io/urcomputeringpal/hlstube:v$RESOLVED_VERSION
   ```
