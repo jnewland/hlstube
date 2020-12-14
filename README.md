@@ -4,9 +4,13 @@
 
 ## Install
 
-[Checkout the latest release] or `docker run --rm -i -p 8080:8080 ghcr.io/jnewland/hlstube:latest`.
+[Pull, clone, or download the latest release](https://github.com/jnewland/hlstube/releases/latest).
 
 ## Usage
+
+```
+docker run --rm -i -p 8080:8080 ghcr.io/jnewland/hlstube:latest
+```
 
 http://localhost:8080/$v
 
