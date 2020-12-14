@@ -43,6 +43,7 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-from: |
+            type=registry,ref=ghcr.io/${{ github.repository }}:cache
             type=local,src=/tmp/.buildx-cache
           cache-to: mode=max,type=local,dest=/tmp/.buildx-cache
 
