@@ -21,12 +21,12 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("%s not found", v), http.StatusNotFound)
 		return
 	}
-	log.Println(v)
 	if len(v) == 0 {
 		http.Error(w, fmt.Sprintf("%s not found", v), http.StatusNotFound)
 		return
 	}
 	if h.m3us[v] == "" {
+		log.Printf("setting up a stream for %s\n", v)
 		m3u, err := exec.Command("youtube-dl", fmt.Sprintf("https://www.youtube.com/watch?v=%s", v), "-g").Output()
 		if err != nil {
 			log.Println(err)
@@ -45,12 +45,22 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	director := func(req *http.Request) {
+		req.Host = origin.Host
 		req.URL.Host = origin.Host
 		req.URL.Scheme = origin.Scheme
 		req.URL.Path = origin.Path
 		req.URL.RawPath = origin.RawPath
 	}
-	proxy := &httputil.ReverseProxy{Director: director}
+	modifyResponse := func(resp *http.Response) error {
+		log.Printf("%s %d\n", v, resp.StatusCode)
+		if resp.StatusCode != http.StatusOK {
+			h.m3us[v] = ""
+			log.Printf("forgot about %s\n", v)
+			resp.Header.Set("X-HLSTube-reset", "m3u forgotten, try again")
+		}
+		return nil
+	}
+	proxy := &httputil.ReverseProxy{Director: director, ModifyResponse: modifyResponse}
 
 	w.Header().Set("X-HLSTube", "is rad")
 	proxy.ServeHTTP(w, r)
