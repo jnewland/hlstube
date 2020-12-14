@@ -1,4 +1,4 @@
-# Copyright 2020 Seth Vargo
+# Dockerfile Copyright 2020 Seth Vargo
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ RUN strip /bin/app
 RUN upx -q -9 /bin/app
 
 
-FROM alpine
+FROM alpine:20200917
 RUN apk add --no-cache \
         ca-certificates \
         curl \
