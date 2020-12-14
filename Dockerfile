@@ -56,4 +56,7 @@ RUN curl -sL https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/you
 # Copy over the compiled action from the first step
 COPY --from=builder /bin/app /bin/app
 # Specify the container's entrypoint as the action
+RUN addgroup -S appgroup && adduser -S app -G appgroup
+WORKDIR /home/app
+USER app
 ENTRYPOINT ["/bin/app"]
