@@ -45,6 +45,10 @@ func (h *M3UTube) handler(w http.ResponseWriter, r *http.Request) {
 
 	for _, json := range strings.Split(string(playlistJson), "\n") {
 		title := jsoniter.Get([]byte(json), "title").ToString()
+		id := jsoniter.Get([]byte(json), "id").ToString()
+		if id == "" || title == "" {
+			continue
+		}
 		extinf := fmt.Sprintf(`#EXTINF:-1 tvg-name="%s" tvc-guide-title="%s",%s`, title, title, title)
 		io.WriteString(w, extinf)
 		io.WriteString(w, "\n")
@@ -61,7 +65,6 @@ func (h *M3UTube) handler(w http.ResponseWriter, r *http.Request) {
 			// default to http
 			rewrittenURL.Scheme = "http"
 		}
-		id := jsoniter.Get([]byte(json), "id").ToString()
 		rewrittenURL.Path = fmt.Sprintf("/%s", id)
 
 		io.WriteString(w, rewrittenURL.String())
