@@ -7,9 +7,7 @@ import (
 )
 
 func main() {
-	hlstube := &HLSTube{}
-	hlstube.m3us = make(map[string]string)
-	http.HandleFunc("/", hlstube.handler)
+	http.HandleFunc("/", NewHLSTube().handler)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
