@@ -50,7 +50,7 @@ func (h *M3UTube) handler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		extinf := fmt.Sprintf(`#EXTINF:-1 tvg-logo="https://i.ytimg.com/vi/%s/maxresdefault.jpg" tvc-guide-art="https://i.ytimg.com/vi/%s/maxresdefault.jpg" tvg-name="%s" tvc-guide-title="%s",%s`, id, id, title, title, title)
+		extinf := fmt.Sprintf(`#EXTINF:-1 channel-id="%s" tvg-logo="https://i.ytimg.com/vi/%s/maxresdefault.jpg" tvc-guide-art="https://i.ytimg.com/vi/%s/maxresdefault.jpg" tvc-guide-description="hlstube" tvg-name="%s" tvc-guide-title="%s",%s`, id, id, id, title, title, id)
 		io.WriteString(w, extinf)
 		io.WriteString(w, "\n")
 
