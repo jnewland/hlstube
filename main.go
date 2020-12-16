@@ -6,20 +6,23 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
 func main() {
-	hlstube := NewHLSTube()
+	hlsTube := NewHLSTube()
+	m3uTube := NewM3UTube()
 	r := mux.NewRouter().SkipClean(true).UseEncodedPath()
-	r.HandleFunc("/_/{_u:.+}", hlstube.handler)
-	r.HandleFunc("/favicon.ico", hlstube.err404)
-	r.HandleFunc("/{v}", hlstube.handler)
+	r.HandleFunc("/_p/{_p:.+}", m3uTube.handler)
+	r.HandleFunc("/_/{_u:.+}", hlsTube.handler)
+	r.HandleFunc("/favicon.ico", err404)
+	r.HandleFunc("/{v}", hlsTube.handler)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 	log.Println("hi")
-	http.ListenAndServe(fmt.Sprintf(":%s", port), r)
+	http.ListenAndServe(fmt.Sprintf(":%s", port), handlers.ProxyHeaders(r))
 	log.Println("bye")
 }
