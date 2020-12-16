@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -13,11 +12,15 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 )
 
 type HLSTube struct {
 	m3us      map[string]string
 	transport *http.Transport
+}
+type stackTracer interface {
+	StackTrace() errors.StackTrace
 }
 
 func NewHLSTube() *HLSTube {
@@ -38,6 +41,14 @@ func NewHLSTube() *HLSTube {
 	}
 }
 
+func logStacktrace(err error) {
+	if err, ok := err.(stackTracer); ok {
+		for _, f := range err.StackTrace() {
+			log.Printf("%+s:%d\n", f, f)
+		}
+	}
+}
+
 func extractUrl(r *http.Request) (*url.URL, error) {
 	vars := mux.Vars(r)
 	if vars["v"] != "" {
@@ -54,15 +65,23 @@ func extractUrl(r *http.Request) (*url.URL, error) {
 	return nil, errors.New("not found")
 }
 
+func (h *HLSTube) errorHandler(w http.ResponseWriter, r *http.Request, err error, code int) {
+	if code > 499 {
+		logStacktrace(err)
+	}
+	http.Error(w, err.Error(), code)
+}
+
 func (h *HLSTube) err404(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not found", http.StatusNotFound)
-	return
+	h.errorHandler(w, r, errors.New("not found"), http.StatusNotFound)
+}
+func (h *HLSTube) err500(w http.ResponseWriter, r *http.Request, err error) {
+	h.errorHandler(w, r, err, http.StatusInternalServerError)
 }
 
 func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	u, err := extractUrl(r)
 	if err != nil {
-		log.Println(err)
 		h.err404(w, r)
 		return
 	}
@@ -70,8 +89,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("setting up a stream for %s\n", u.String())
 		m3u, err := exec.Command("youtube-dl", u.String(), "-g").Output()
 		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			h.err500(w, r, err)
 			return
 		}
 		h.m3us[u.String()] = strings.TrimSpace(string(m3u))
@@ -79,8 +97,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 
 	origin, err := url.Parse(h.m3us[u.String()])
 	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		h.err500(w, r, err)
 		return
 	}
 
@@ -100,7 +117,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 		}
 		return nil
 	}
-	proxy := &httputil.ReverseProxy{Director: director, ModifyResponse: modifyResponse, Transport: h.transport}
+	proxy := &httputil.ReverseProxy{Director: director, ModifyResponse: modifyResponse, Transport: h.transport, ErrorHandler: h.err500}
 
 	w.Header().Set("X-HLSTube", "is rad")
 	proxy.ServeHTTP(w, r)

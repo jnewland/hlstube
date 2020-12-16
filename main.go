@@ -13,6 +13,7 @@ func main() {
 	hlstube := NewHLSTube()
 	r := mux.NewRouter().SkipClean(true).UseEncodedPath()
 	r.HandleFunc("/_/{_u:.+}", hlstube.handler)
+	r.HandleFunc("/favicon.ico", hlstube.err404)
 	r.HandleFunc("/{v}", hlstube.handler)
 	port := os.Getenv("PORT")
 	if port == "" {
