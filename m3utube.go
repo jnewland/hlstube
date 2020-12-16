@@ -49,7 +49,8 @@ func (h *M3UTube) handler(w http.ResponseWriter, r *http.Request) {
 		if id == "" || title == "" {
 			continue
 		}
-		extinf := fmt.Sprintf(`#EXTINF:-1 tvg-name="%s" tvc-guide-title="%s",%s`, title, title, title)
+
+		extinf := fmt.Sprintf(`#EXTINF:-1 tvg-logo="https://i.ytimg.com/vi/%s/maxresdefault.jpg" tvc-guide-art="https://i.ytimg.com/vi/%s/maxresdefault.jpg" tvg-name="%s" tvc-guide-title="%s",%s`, id, id, title, title, title)
 		io.WriteString(w, extinf)
 		io.WriteString(w, "\n")
 
