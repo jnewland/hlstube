@@ -77,7 +77,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	}
 	modifyResponse := func(resp *http.Response) error {
 		log.Printf("%s %d\n", u, resp.StatusCode)
-		if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode > 299 {
 			h.m3us[u.String()] = ""
 			log.Printf("forgot about %s\n", u.String())
 			resp.Header.Set("X-HLSTube-reset", "m3u forgotten, try again")
