@@ -17,7 +17,8 @@ type HLSTube struct {
 }
 
 const (
-	format = "best[ext=mp4]/best"
+	format    = "best[ext=mp4]"
+	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.101 Safari/537.36"
 )
 
 func NewHLSTube() *HLSTube {
@@ -67,6 +68,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 
 	director := func(req *http.Request) {
 		req.Host = origin.Host
+		req.Header.Set("User-Agent", userAgent)
 		req.URL.Host = origin.Host
 		req.URL.Scheme = origin.Scheme
 		req.URL.Path = origin.Path
