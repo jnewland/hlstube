@@ -48,6 +48,11 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("setting up a stream for %s\n", u.String())
 		m3u, err := exec.Command("youtube-dl", "--format", format, u.String(), "-g").Output()
 		if err != nil {
+			if exiterr, ok := err.(*exec.ExitError); ok {
+				log.Printf(string(exiterr.Stderr))
+				err500(w, r, exiterr)
+				return
+			}
 			err500(w, r, err)
 			return
 		}
