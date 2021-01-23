@@ -52,7 +52,7 @@ RUN apk add --no-cache \
         gnupg \
         python3 \
     && ln -s /usr/bin/python3 /usr/bin/python 
-RUN curl -sL https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl && chmod a+rx /usr/local/bin/youtube-dl
+RUN curl -sL https://yt-dl.org/downloads/2021.01.16/youtube-dl -o /usr/local/bin/youtube-dl && chmod a+rx /usr/local/bin/youtube-dl
 # Copy over the compiled action from the first step
 COPY --from=builder /bin/app /bin/app
 # Specify the container's entrypoint as the action
