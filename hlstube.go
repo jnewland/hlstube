@@ -46,7 +46,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	}
 	if h.m3us[u.String()] == "" {
 		log.Printf("setting up a stream for %s\n", u.String())
-		m3u, err := exec.Command("youtube-dl", "--format", format, u.String(), "-g").Output()
+		m3u, err := exec.Command("youtube-dl", "--hls-use-mpegts", "--format", format, u.String(), "-g").Output()
 		if err != nil {
 			err500(w, r, err)
 			return
