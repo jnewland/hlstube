@@ -35,7 +35,7 @@ func NewHLSTube() *HLSTube {
 }
 
 func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
-	u, err := extractUrl(r)
+	u, err := extractURL(r)
 	if err != nil {
 		err404(w, r)
 		return
