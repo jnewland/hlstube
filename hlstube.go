@@ -16,6 +16,10 @@ type HLSTube struct {
 	transport *http.Transport
 }
 
+const (
+	format = "best[ext=mp4]/best"
+)
+
 func NewHLSTube() *HLSTube {
 	return &HLSTube{
 		m3us: make(map[string]string),
@@ -42,7 +46,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	}
 	if h.m3us[u.String()] == "" {
 		log.Printf("setting up a stream for %s\n", u.String())
-		m3u, err := exec.Command("youtube-dl", u.String(), "-g").Output()
+		m3u, err := exec.Command("youtube-dl", "--format", format, u.String(), "-g").Output()
 		if err != nil {
 			err500(w, r, err)
 			return
