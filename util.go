@@ -23,7 +23,7 @@ func logStacktrace(err error) {
 	}
 }
 
-func extractUrl(r *http.Request) (*url.URL, error) {
+func extractURL(r *http.Request) (*url.URL, error) {
 	vars := mux.Vars(r)
 	if vars["v"] != "" {
 		return url.Parse(fmt.Sprintf("https://www.youtube.com/watch?v=%s", vars["v"]))

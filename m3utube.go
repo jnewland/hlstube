@@ -33,7 +33,7 @@ func NewM3UTube() *M3UTube {
 func (h *M3UTube) handler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	playlistJson, err := exec.Command("youtube-dl", "-j", "--flat-playlist", "-i", vars["_p"]).Output()
+	playlistJSON, err := exec.Command("youtube-dl", "-j", "--flat-playlist", "-i", vars["_p"]).Output()
 	if err != nil {
 		err500(w, r, err)
 		return
@@ -43,7 +43,7 @@ func (h *M3UTube) handler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	io.WriteString(w, "#EXTM3U\n\n")
 
-	for _, json := range strings.Split(string(playlistJson), "\n") {
+	for _, json := range strings.Split(string(playlistJSON), "\n") {
 		title := jsoniter.Get([]byte(json), "title").ToString()
 		id := jsoniter.Get([]byte(json), "id").ToString()
 		if id == "" || title == "" {
