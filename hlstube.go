@@ -73,6 +73,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 		req.URL.Scheme = origin.Scheme
 		req.URL.Path = origin.Path
 		req.URL.RawPath = origin.RawPath
+		req.URL.RawQuery = origin.RawQuery
 	}
 	modifyResponse := func(resp *http.Response) error {
 		log.Printf("%s %d\n", u, resp.StatusCode)
