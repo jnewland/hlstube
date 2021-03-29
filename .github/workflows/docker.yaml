@@ -11,7 +11,7 @@ jobs:
       - uses: docker/setup-buildx-action@v1
 
       - id: docker_meta
-        uses: crazy-max/ghaction-docker-meta@v1
+        uses: crazy-max/ghaction-docker-meta@v2
         with:
           github-token: ${{ github.token }}
           images: ghcr.io/${{ github.repository }}
