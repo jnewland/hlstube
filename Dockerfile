@@ -46,7 +46,7 @@ RUN strip /bin/app
 RUN upx -q -9 /bin/app
 
 
-FROM alpine:20200917
+FROM alpine:20210212
 RUN apk add --no-cache \
         apache2 \
         ca-certificates \
