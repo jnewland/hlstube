@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -50,6 +51,33 @@ func errorHandler(w http.ResponseWriter, r *http.Request, err error, code int) {
 func err404(w http.ResponseWriter, r *http.Request) {
 	errorHandler(w, r, errors.New("not found"), http.StatusNotFound)
 }
+
+func err403(w http.ResponseWriter, r *http.Request) {
+	errorHandler(w, r, errors.New("unauthorized"), http.StatusUnauthorized)
+}
+
 func err500(w http.ResponseWriter, r *http.Request, err error) {
 	errorHandler(w, r, err, http.StatusInternalServerError)
+}
+
+// wildCardToRegexp converts a wildcard pattern to a regular expression pattern.
+func wildCardToRegexp(pattern string) string {
+	var result strings.Builder
+	for i, literal := range strings.Split(pattern, "*") {
+
+		// Replace * with .*
+		if i > 0 {
+			result.WriteString(".*")
+		}
+
+		// Quote any regular expression meta characters in the
+		// literal text.
+		result.WriteString(regexp.QuoteMeta(literal))
+	}
+	return result.String()
+}
+
+func matchWildcard(pattern string, value string) bool {
+	result, _ := regexp.MatchString(wildCardToRegexp(pattern), value)
+	return result
 }
