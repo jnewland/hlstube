@@ -1,4 +1,5 @@
 # Dockerfile Copyright 2020 Seth Vargo
+#                      2021 Jesse Newland
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +14,7 @@
 # limitations under the License.
 
 # Specify the version of Go to use
-FROM golang:1.15 as builder
+FROM golang:1.16 as builder
 
 # Install upx (upx.github.io) to compress the compiled action
 RUN apt-get update && apt-get -y install upx
@@ -21,12 +22,14 @@ RUN apt-get update && apt-get -y install upx
 # Turn on Go modules support and disable CGO
 ENV GO111MODULE=on CGO_ENABLED=0
 
-# Copy all the files from the host into the container
+# Get deps
 WORKDIR /src
-COPY . .
+COPY go.* .
+RUN go mod download
 
-# Compile the action - the added flags instruct Go to produce a
+# Compile the binary - the added flags instruct Go to produce a
 # standalone binary
+COPY . .
 RUN go build \
   -a \
   -trimpath \
@@ -45,6 +48,7 @@ RUN upx -q -9 /bin/app
 
 FROM alpine:20200917
 RUN apk add --no-cache \
+        apache2 \
         ca-certificates \
         curl \
         dumb-init \
