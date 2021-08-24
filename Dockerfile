@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # Specify the version of Go to use
-FROM golang:1.16 as builder
+FROM golang:1.17 as builder
 
 # Install upx (upx.github.io) to compress the compiled action
 RUN apt-get update && apt-get -y install upx
