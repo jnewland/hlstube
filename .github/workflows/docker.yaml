@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.action != 'closed' && ( github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'docker:pr-image') )
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         platform:
           - linux/amd64
