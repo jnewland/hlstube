@@ -20,6 +20,7 @@ jobs:
         with:
           github-token: ${{ github.token }}
           tags: |
+            type=ref,event=tag
             type=raw,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }},value=${{ github.event.repository.default_branch }}
             type=raw,enable=${{ contains(github.event.pull_request.labels.*.name, 'docker:pr-image') }},value=pr-${{ github.event.pull_request.number }}
           images: |
