@@ -8,7 +8,7 @@ on:
       - synchronize
 
 jobs:
-  docker:
+  build:
     runs-on: ubuntu-latest
     if: github.event.action != 'closed' && ( github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'docker:pr-image') )
     strategy:
@@ -49,3 +49,10 @@ jobs:
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.platform }}
           cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - run: |
+          true
