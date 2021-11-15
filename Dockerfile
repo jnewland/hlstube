@@ -16,7 +16,7 @@
 # Specify the version of Go to use
 FROM golang:1.17 as builder
 
-# Install upx (upx.github.io) to compress the compiled action
+# Install upx (upx.github.io) to compress the compiled binary
 RUN apt-get update && apt-get -y install upx
 
 # Turn on Go modules support and disable CGO
@@ -42,25 +42,15 @@ RUN go build \
 # Strip any symbols - this is not a library
 RUN strip /bin/app
 
-# Compress the compiled action
+# Compress the compiled binary
 RUN upx -q -9 /bin/app
 
-
-FROM alpine:20210804
-RUN apk add --no-cache \
-        apache2 \
-        ca-certificates \
-        curl \
-        dumb-init \
-        ffmpeg \
-        gnupg \
-        python3 \
-    && ln -s /usr/bin/python3 /usr/bin/python 
-RUN curl -sL https://yt-dl.org/downloads/2021.01.16/youtube-dl -o /usr/local/bin/youtube-dl && chmod a+rx /usr/local/bin/youtube-dl
-# Copy over the compiled action from the first step
+FROM mikenye/youtube-dl:2021.06.06
+RUN apt-get update && apt-get -y install procps lsof
+# Copy over the compiled binary from the first step
 COPY --from=builder /bin/app /bin/app
-# Specify the container's entrypoint as the action
-RUN addgroup -S appgroup && adduser -S app -G appgroup
+# Specify the container's entrypoint as the binary
+RUN addgroup --system appgroup && adduser --system app && adduser app appgroup
 WORKDIR /home/app
 USER app
 ENTRYPOINT ["/bin/app"]

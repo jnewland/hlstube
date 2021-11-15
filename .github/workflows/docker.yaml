@@ -1,57 +1,43 @@
 name: docker
 on:
-  workflow_dispatch:
   push:
+  pull_request:
+    types:
+      - opened
+      - labeled
+      - synchronize
+
 jobs:
   docker:
     runs-on: ubuntu-latest
+    if: github.event.action != 'closed' && ( github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'docker:pr-image') )
     steps:
       - uses: actions/checkout@v2
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
-
       - id: docker_meta
         uses: docker/metadata-action@v3
         with:
           github-token: ${{ github.token }}
-          images: ghcr.io/${{ github.repository }}
-
-      - uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache
-
-          # Tags and the default branch use a prefix of ${{ runner.os }}-buildx-dev-false-
-          # Dev branches use a prefix of ${{ runner.os }}-buildx-dev-true-
-          key: ${{ runner.os }}-buildx-dev-${{ ! (startsWith(github.ref, 'refs/tags/') || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)) }}-${{ github.sha }}-${{ github.run_id }}
-
-          # Only restore caches on dev branches
-          # The repository cache source contains cached layers from the default branch
-          # Essentially gives each branch / PR a shared docker context
-          restore-keys: |
-            ${{ runner.os }}-buildx-dev-true-
+          tags: |
+            type=raw,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }},value=${{ github.event.repository.default_branch }}
+            type=raw,enable=${{ contains(github.event.pull_request.labels.*.name, 'docker:pr-image') }},value=pr-${{ github.event.pull_request.number }}
+          images: |
+            ghcr.io/${{ github.repository }}
 
       - uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
-      
+
       - uses: docker/build-push-action@v2
         with:
+          build-args: GIT_SHA=${{ github.sha }}
+          platforms: linux/amd64,linux/arm64/v8
           pull: true
-          push: ${{ startsWith(github.ref, 'refs/tags/') || github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+          push: ${{ startsWith(github.ref, 'refs/tags/') || github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || contains(github.event.pull_request.labels.*.name, 'docker:pr-image') }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
-          cache-from: |
-            type=registry,ref=ghcr.io/${{ github.repository }}:cache
-            type=local,src=/tmp/.buildx-cache
-          cache-to: mode=max,type=local,dest=/tmp/.buildx-cache
-
-      - name: push cache image
-        uses: docker/build-push-action@v2
-        with:
-          pull: false
-          push: ${{ startsWith(github.ref, 'refs/tags/') || github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || github.ref == 'refs/heads/cache' }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=inline
-          tags: ghcr.io/${{ github.repository }}:cache
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
