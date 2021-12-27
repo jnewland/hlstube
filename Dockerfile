@@ -45,7 +45,7 @@ RUN strip /bin/app
 # Compress the compiled binary
 RUN upx -q -9 /bin/app
 
-FROM mikenye/youtube-dl:2021.06.06
+FROM mikenye/youtube-dl:2021.12.17
 RUN apt-get update && apt-get -y install procps lsof
 # Copy over the compiled binary from the first step
 COPY --from=builder /bin/app /bin/app
