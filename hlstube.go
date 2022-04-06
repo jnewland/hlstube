@@ -17,7 +17,7 @@ type HLSTube struct {
 }
 
 const (
-	format    = "best[ext=mp4]"
+	format    = "best[protocol^=m3u8]"
 	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.101 Safari/537.36"
 )
 
@@ -47,7 +47,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	}
 	if h.m3us[u.String()] == "" {
 		log.Printf("setting up a stream for %s\n", u.String())
-		m3u, err := exec.Command("yt-dlp", "--hls-use-mpegts", "--format", format, u.String(), "-g").Output()
+		m3u, err := exec.Command("yt-dlp", "--format", format, u.String(), "-g").Output()
 		if err != nil {
 			if exiterr, ok := err.(*exec.ExitError); ok {
 				log.Printf(string(exiterr.Stderr))
