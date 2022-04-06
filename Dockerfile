@@ -29,8 +29,8 @@ RUN go mod download
 
 # Compile the binary - the added flags instruct Go to produce a
 # standalone binary
-COPY . .
-RUN go build \
+COPY *.go .
+RUN find /src > /tmp/manifest && go build \
   -a \
   -trimpath \
   -ldflags "-s -w -extldflags '-static'" \
@@ -47,10 +47,11 @@ RUN upx -q -9 /bin/app
 
 FROM mikenye/youtube-dl:2022.02.04
 RUN apt-get update && apt-get -y install procps lsof
-# Copy over the compiled binary from the first step
-COPY --from=builder /bin/app /bin/app
-# Specify the container's entrypoint as the binary
 RUN addgroup --system appgroup && adduser --system app && adduser app appgroup
 WORKDIR /home/app
 USER app
 ENTRYPOINT ["/bin/app"]
+# Copy over the compiled binary from the first step
+COPY --from=builder /bin/app /bin/app
+COPY --from=builder /tmp/manifest /tmp/manifest
+# Specify the container's entrypoint as the binary

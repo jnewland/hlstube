@@ -1,4 +1,10 @@
 Dockerfile
+Makefile
 *.yml
 *.md
 *.json
+.env
+.git
+.devcontainer
+.github
+.vscode
