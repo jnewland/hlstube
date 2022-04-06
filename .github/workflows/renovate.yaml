@@ -10,15 +10,19 @@ jobs:
   renovate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - env:
           RENOVATE_AUTODISCOVER: 'false'
           RENOVATE_TOKEN: ${{ secrets.CR_PAT }}
           LOG_LEVEL: debug
           LOG_FORMAT: json
         run: |
-          docker run --rm -i -v $(pwd):$(pwd) -w $(pwd) -e LOG_LEVEL -e LOG_FORMAT -e RENOVATE_TOKEN \
-            renovate/renovate:slim ${{ github.repository }} | tee renovate.jsonl
+          docker run --rm -i \
+            -v $(pwd):$(pwd) -w $(pwd) \
+            -e LOG_LEVEL \
+            -e LOG_FORMAT \
+            -e RENOVATE_TOKEN \
+            renovate/renovate:latest ${{ github.repository }} | tee renovate.jsonl
           if grep -i fail renovate.jsonl; then
             echo "::warning ::$(grep -i fail renovate.jsonl| jq -r .msg)"
           fi

@@ -15,19 +15,10 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-type M3UTube struct {
-	streams []*stream
-}
-
-type stream struct {
-	name string
-	url  string
-}
+type M3UTube struct{}
 
 func NewM3UTube() *M3UTube {
-	return &M3UTube{
-		streams: make([]*stream, 0),
-	}
+	return &M3UTube{}
 }
 
 func (h *M3UTube) handler(w http.ResponseWriter, r *http.Request) {
