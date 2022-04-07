@@ -24,7 +24,7 @@ func NewM3UTube() *M3UTube {
 func (h *M3UTube) handler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	playlistJSON, err := exec.Command("youtube-dl", "-j", "--flat-playlist", "-i", vars["_p"]).Output()
+	playlistJSON, err := exec.Command("yt-dlp", "-j", "--flat-playlist", "-i", vars["_p"]).Output()
 	if err != nil {
 		err500(w, r, err)
 		return
