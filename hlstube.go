@@ -10,6 +10,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type HLSTube struct {
@@ -40,14 +42,24 @@ func NewHLSTube() *HLSTube {
 	}
 }
 
-func yt2m3u(u string) (string, error) {
-	m3u, err := exec.Command("yt-dlp", "--format", format, u, "-g").Output()
-	if err != nil {
-		return "", err
+func yt2m3u(u string) (s string, err error) {
+	attempts := 3
+	for i := 0; i < attempts; i++ {
+		if i > 1 {
+			log.Printf("retrying %s\n", u)
+			time.Sleep(time.Duration(i) * time.Second)
+		}
+		m3u, err := exec.Command("yt-dlp", "--format", format, u, "-g").Output()
+		if len(m3u) > 0 && err == nil {
+			fmt.Printf("%s is %s\n", u, m3u)
+			trimmed := strings.TrimSpace(string(m3u))
+			return trimmed, nil
+		}
 	}
-	fmt.Printf("%s is %s\n", u, m3u)
-	trimmed := strings.TrimSpace(string(m3u))
-	return trimmed, nil
+	if err == nil {
+		err = errors.New("yt-dlp failed")
+	}
+	return "", err
 }
 
 func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +71,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	ytUrl := u.String()
 
 	if h.m3us[ytUrl] == "" {
-		log.Printf("%s want to stream %s\n", r.RemoteAddr, ytUrl)
+		log.Printf("%s wants to stream %s\n", r.RemoteAddr, ytUrl)
 		h.m3us[ytUrl], err = yt2m3u(ytUrl)
 	}
 
