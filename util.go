@@ -31,7 +31,6 @@ func extractURL(r *http.Request) (*url.URL, error) {
 	}
 	if vars["_u"] != "" {
 		url, err := url.Parse(strings.Split(r.URL.Path, "/_/")[1])
-		log.Printf("%#v\n", r.URL)
 		url.RawQuery = r.URL.RawQuery
 		if err != nil {
 			return nil, err
