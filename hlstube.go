@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -39,28 +40,38 @@ func NewHLSTube() *HLSTube {
 	}
 }
 
+func yt2m3u(u string) (string, error) {
+	m3u, err := exec.Command("yt-dlp", "--format", format, u, "-g").Output()
+	if err != nil {
+		return "", err
+	}
+	fmt.Printf("%s is %s\n", u, m3u)
+	trimmed := strings.TrimSpace(string(m3u))
+	return trimmed, nil
+}
+
 func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	u, err := extractURL(r)
 	if err != nil {
 		err404(w, r)
 		return
 	}
-	if h.m3us[u.String()] == "" {
-		log.Printf("setting up a stream for %s\n", u.String())
-		m3u, err := exec.Command("yt-dlp", "--format", format, u.String(), "-g").Output()
-		if err != nil {
-			if exiterr, ok := err.(*exec.ExitError); ok {
-				log.Printf(string(exiterr.Stderr))
-				err500(w, r, exiterr)
-				return
-			}
-			err500(w, r, err)
-			return
-		}
-		h.m3us[u.String()] = strings.TrimSpace(string(m3u))
+	ytUrl := u.String()
+
+	if h.m3us[ytUrl] == "" {
+		log.Printf("%s want to stream %s\n", r.RemoteAddr, ytUrl)
+		h.m3us[ytUrl], err = yt2m3u(ytUrl)
 	}
 
-	origin, err := url.Parse(h.m3us[u.String()])
+	if err != nil {
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			log.Println(string(exiterr.Stderr))
+			err500(w, r, exiterr)
+			return
+		}
+	}
+
+	origin, err := url.Parse(h.m3us[ytUrl])
 	if err != nil {
 		err500(w, r, err)
 		return
@@ -76,13 +87,15 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 		req.URL.RawQuery = origin.RawQuery
 	}
 	modifyResponse := func(resp *http.Response) error {
-		log.Printf("%s %d\n", u, resp.StatusCode)
 		if resp.StatusCode > 299 {
-			h.m3us[u.String()] = ""
-			log.Printf("forgot about %s\n", u.String())
-			resp.Header.Set("X-HLSTube-reset", "m3u forgotten, try again")
+			log.Printf("reconfiguring %s\n", ytUrl)
+			h.m3us[ytUrl], err = yt2m3u(ytUrl)
+			log.Printf("asking %s to retry\n", r.RemoteAddr)
+			return fmt.Errorf("retry")
+		} else {
+			log.Printf("streaming %s to %s\n", ytUrl, r.RemoteAddr)
+			return nil
 		}
-		return nil
 	}
 	proxy := &httputil.ReverseProxy{Director: director, ModifyResponse: modifyResponse, Transport: h.transport, ErrorHandler: err500}
 
