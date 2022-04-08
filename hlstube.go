@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -94,5 +95,8 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("streaming %s to %s\n", ytUrl, r.RemoteAddr)
-	http.Redirect(w, r, m3u, http.StatusFound)
+	w.Header().Set("Content-Type", "audio/x-mpegurl")
+	w.WriteHeader(http.StatusOK)
+	io.WriteString(w, "#EXTM3U\n\n#EXT-X-STREAM-INF:PROGRAM-ID=1,AUDIO=\"stereo\"\n")
+	io.WriteString(w, m3u+"\n\n")
 }
