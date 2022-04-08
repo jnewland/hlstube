@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/ReneKroon/ttlcache"
 )
 
 type HLSTube struct {
-	m3us      map[string]string
+	m3us      *ttlcache.Cache
 	transport *http.Transport
 }
 
@@ -25,8 +25,11 @@ const (
 )
 
 func NewHLSTube() *HLSTube {
+	cache := ttlcache.NewCache()
+	cache.SetTTL(time.Duration(5 * time.Hour))
+	cache.SkipTtlExtensionOnHit(true)
 	return &HLSTube{
-		m3us: make(map[string]string),
+		m3us: cache,
 		transport: &http.Transport{
 			DialContext: (&net.Dialer{
 				Timeout:   30 * time.Second,
@@ -57,7 +60,7 @@ func yt2m3u(u string) (s string, err error) {
 		}
 	}
 	if err == nil {
-		err = errors.New("yt-dlp failed")
+		err = fmt.Errorf("yt-dlp failed")
 	}
 	return "", err
 }
@@ -70,20 +73,27 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	}
 	ytUrl := u.String()
 
-	if h.m3us[ytUrl] == "" {
+	var m3u string
+
+	value, exists := h.m3us.Get(ytUrl)
+
+	if exists {
+		m3u = value.(string)
+	} else {
 		log.Printf("%s wants to stream %s\n", r.RemoteAddr, ytUrl)
-		h.m3us[ytUrl], err = yt2m3u(ytUrl)
-	}
+		m3u, err = yt2m3u(ytUrl)
 
-	if err != nil {
-		if exiterr, ok := err.(*exec.ExitError); ok {
-			log.Println(string(exiterr.Stderr))
-			err500(w, r, exiterr)
-			return
+		if err != nil {
+			if exiterr, ok := err.(*exec.ExitError); ok {
+				log.Println(string(exiterr.Stderr))
+				err500(w, r, exiterr)
+				return
+			}
 		}
+		h.m3us.Set(ytUrl, m3u)
 	}
 
-	origin, err := url.Parse(h.m3us[ytUrl])
+	origin, err := url.Parse(m3u)
 	if err != nil {
 		err500(w, r, err)
 		return
@@ -101,7 +111,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	modifyResponse := func(resp *http.Response) error {
 		if resp.StatusCode > 299 {
 			log.Printf("reconfiguring %s\n", ytUrl)
-			h.m3us[ytUrl], err = yt2m3u(ytUrl)
+			h.m3us.Remove(ytUrl)
 			log.Printf("asking %s to retry\n", r.RemoteAddr)
 			return fmt.Errorf("retry")
 		} else {
