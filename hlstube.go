@@ -5,8 +5,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"os/exec"
 	"strings"
 	"time"
@@ -93,34 +91,6 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 		h.m3us.Set(ytUrl, m3u)
 	}
 
-	origin, err := url.Parse(m3u)
-	if err != nil {
-		err500(w, r, err)
-		return
-	}
-
-	director := func(req *http.Request) {
-		req.Host = origin.Host
-		req.Header.Set("User-Agent", userAgent)
-		req.URL.Host = origin.Host
-		req.URL.Scheme = origin.Scheme
-		req.URL.Path = origin.Path
-		req.URL.RawPath = origin.RawPath
-		req.URL.RawQuery = origin.RawQuery
-	}
-	modifyResponse := func(resp *http.Response) error {
-		if resp.StatusCode > 299 {
-			log.Printf("reconfiguring %s\n", ytUrl)
-			h.m3us.Remove(ytUrl)
-			log.Printf("asking %s to retry\n", r.RemoteAddr)
-			return fmt.Errorf("retry")
-		} else {
-			log.Printf("streaming %s to %s\n", ytUrl, r.RemoteAddr)
-			return nil
-		}
-	}
-	proxy := &httputil.ReverseProxy{Director: director, ModifyResponse: modifyResponse, Transport: h.transport, ErrorHandler: err500}
-
-	w.Header().Set("X-HLSTube", "is rad")
-	proxy.ServeHTTP(w, r)
+	log.Printf("streaming %s to %s\n", ytUrl, r.RemoteAddr)
+	http.Redirect(w, r, m3u, http.StatusFound)
 }
