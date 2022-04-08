@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ReneKroon/ttlcache"
+	ttlcache "github.com/jellydator/ttlcache/v3"
 )
 
 type HLSTube struct {
-	m3us      *ttlcache.Cache
+	m3us      *ttlcache.Cache[string, string]
 	transport *http.Transport
 }
 
@@ -23,9 +23,11 @@ const (
 )
 
 func NewHLSTube() *HLSTube {
-	cache := ttlcache.NewCache()
-	cache.SetTTL(time.Duration(5 * time.Hour))
-	cache.SkipTtlExtensionOnHit(true)
+	cache := ttlcache.New(
+		ttlcache.WithTTL[string, string](5*time.Hour),
+		ttlcache.WithDisableTouchOnHit[string, string](),
+	)
+	go cache.Start()
 	return &HLSTube{
 		m3us: cache,
 		transport: &http.Transport{
@@ -73,10 +75,10 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 
 	var m3u string
 
-	value, exists := h.m3us.Get(ytUrl)
+	item := h.m3us.Get(ytUrl)
 
-	if exists {
-		m3u = value.(string)
+	if item != nil {
+		m3u = item.Value()
 	} else {
 		log.Printf("%s wants to stream %s\n", r.RemoteAddr, ytUrl)
 		m3u, err = yt2m3u(ytUrl)
@@ -88,7 +90,7 @@ func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		h.m3us.Set(ytUrl, m3u)
+		h.m3us.Set(ytUrl, m3u, ttlcache.DefaultTTL)
 	}
 
 	log.Printf("streaming %s to %s\n", ytUrl, r.RemoteAddr)
