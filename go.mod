@@ -5,12 +5,16 @@ go 1.18
 require (
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
-	github.com/jellydator/ttlcache v1.5.0
 	github.com/json-iterator/go v1.1.12
 	github.com/pkg/errors v0.9.1
 )
 
-require golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/objx v0.3.0 // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
+)
 
 require (
 	github.com/felixge/httpsnoop v1.0.2 // indirect
