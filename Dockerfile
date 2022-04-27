@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # Specify the version of Go to use
-FROM golang:1.18 as builder
+FROM golang:1.18@sha256:12d3995156cb0dcdbb9d3edb5827e4e8e1bf5bf92436bfd12d696ec997001a9a as builder
 
 # Install upx (upx.github.io) to compress the compiled binary
 RUN apt-get update && apt-get -y install upx
@@ -45,7 +45,7 @@ RUN strip /bin/app
 # Compress the compiled binary
 RUN upx -q -9 /bin/app
 
-FROM mikenye/youtube-dl:2022.02.04
+FROM mikenye/youtube-dl:2022.02.04@sha256:584aae5eaa719b51a1579eb598a6b6eac58493346221a558dd9849c67d137006
 RUN apt-get update && apt-get -y install procps lsof
 RUN addgroup --system appgroup && adduser --system app && adduser app appgroup
 WORKDIR /home/app
