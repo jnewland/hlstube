@@ -1,28 +1,14 @@
 name: renovate
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+  workflow_dispatch: {}
   schedule:
     - cron:  '0 */4 * * *'
 jobs:
   renovate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - env:
-          RENOVATE_AUTODISCOVER: 'false'
-          RENOVATE_TOKEN: ${{ secrets.CR_PAT }}
-          LOG_LEVEL: debug
-          LOG_FORMAT: json
-        run: |
-          docker run --rm -i \
-            -v $(pwd):$(pwd) -w $(pwd) \
-            -e LOG_LEVEL \
-            -e LOG_FORMAT \
-            -e RENOVATE_TOKEN \
-            renovate/renovate:latest ${{ github.repository }} | tee renovate.jsonl
-          if grep -i fail renovate.jsonl; then
-            echo "::warning ::$(grep -i fail renovate.jsonl| jq -r .msg)"
-          fi
+    uses: jnewland/.github/.github/workflows/renovate.yaml@main
+    secrets:
+      RENOVATE_APP_ID: ${{ secrets.RENOVATE_APP_ID }}
+      RENOVATE_APP_PEM: ${{ secrets.RENOVATE_APP_PEM }}
