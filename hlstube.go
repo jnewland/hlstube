@@ -53,7 +53,7 @@ func yt2m3u(u string) (s string, err error) {
 			log.Printf("retrying %s\n", u)
 			time.Sleep(time.Duration(i) * time.Second)
 		}
-		m3u, err := exec.Command("yt-dlp", "-f", "b", u, "-g").Output()
+		m3u, err := exec.Command("yt-dlp", "-f", "(m3u8,mp4)", u, "-g").Output()
 		if len(m3u) > 0 && err == nil {
 			fmt.Printf("%s is %s\n", u, m3u)
 			trimmed := strings.TrimSpace(string(m3u))
