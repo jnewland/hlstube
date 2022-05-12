@@ -66,6 +66,24 @@ func yt2m3u(u string) (s string, err error) {
 	return "", err
 }
 
+func (h *HLSTube) redirectHandler(w http.ResponseWriter, r *http.Request) {
+	u, err := extractURL(r)
+	if err != nil {
+		err404(w, r)
+		return
+	}
+	m3u, err := yt2m3u(u.String())
+
+	if err != nil {
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			log.Println(string(exiterr.Stderr))
+			err500(w, r, exiterr)
+			return
+		}
+	}
+	http.Redirect(w, r, m3u, http.StatusMovedPermanently)
+}
+
 func (h *HLSTube) handler(w http.ResponseWriter, r *http.Request) {
 	u, err := extractURL(r)
 	if err != nil {
