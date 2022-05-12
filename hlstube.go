@@ -20,7 +20,6 @@ type HLSTube struct {
 }
 
 const (
-	format    = "best[protocol^=m3u8]"
 	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.101 Safari/537.36"
 )
 
@@ -54,7 +53,7 @@ func yt2m3u(u string) (s string, err error) {
 			log.Printf("retrying %s\n", u)
 			time.Sleep(time.Duration(i) * time.Second)
 		}
-		m3u, err := exec.Command("yt-dlp", "--format", format, u, "-g").Output()
+		m3u, err := exec.Command("yt-dlp", "-f", "b", u, "-g").Output()
 		if len(m3u) > 0 && err == nil {
 			fmt.Printf("%s is %s\n", u, m3u)
 			trimmed := strings.TrimSpace(string(m3u))
