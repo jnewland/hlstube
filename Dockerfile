@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # Specify the version of Go to use
-FROM golang:1.19.0@sha256:d72a2944621f0f4027983e094bdf9464d26459c17efe732320043b84c91e51e7 as builder
+FROM golang:1.19.0@sha256:d3f734e1f46ec36da8c1bce67cd48536138085289e24cfc8765f483c401b7d96 as builder
 
 # Install upx (upx.github.io) to compress the compiled binary
 RUN apt-get update && apt-get -y install upx
