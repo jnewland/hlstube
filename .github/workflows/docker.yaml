@@ -1,6 +1,9 @@
 name: docker
 on:
   push:
+    paths-ignore:
+      - '.github/**'
+      - '!.github/workflows/docker.yaml'
   pull_request:
     types:
       - opened
