@@ -14,7 +14,7 @@
 
 ## Install
 
-[Pull, clone, or download the latest release](https://github.com/jnewland/hlstube/releases/latest).
+[Pull](https://ghcr.io/jnewland/hlstube), clone, or download the [latest release](https://github.com/jnewland/hlstube/releases/latest).
 
 ## Usage
 
