@@ -15,5 +15,6 @@ module.exports = {
   packageRules: {
     matchPackageNames: ['mikenye/youtube-dl'],
     versioning: 'loose'
-  }
+  },
+  postUpdateOptions: ['gomodTidy'],
 };
