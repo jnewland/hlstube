@@ -1,6 +1,6 @@
 module github.com/jnewland/hlstube
 
-go 1.19
+go 1.20
 
 require (
 	github.com/gorilla/handlers v1.5.1
