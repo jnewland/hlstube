@@ -46,6 +46,9 @@ RUN strip /bin/app
 RUN upx -q -9 /bin/app
 
 FROM mikenye/youtube-dl:2022.03.08.2@sha256:4a84039bfd156063a4acd8dd0ad42308a93c224da122a563198742161522abc5
+# renovate: datasource=pip depName=yt-dlp versioning=loose
+ENV YOUTUBE_DL_VERSION=2022.03.08.2
+RUN python3 -m pip install --upgrade --no-cache-dir yt-dlp==${YOUTUBE_DL_VERSION}
 RUN apt-get update && apt-get -y install procps lsof
 RUN addgroup --system appgroup && adduser --system app && adduser app appgroup
 WORKDIR /home/app
