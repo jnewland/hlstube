@@ -45,13 +45,21 @@ RUN strip /bin/app
 # Compress the compiled binary
 RUN upx -q -9 /bin/app
 
-FROM mikenye/youtube-dl:2022.02.04@sha256:584aae5eaa719b51a1579eb598a6b6eac58493346221a558dd9849c67d137006
+# Use a pre-baked image with most of the tools we need
+FROM mikenye/youtube-dl:2022.03.08.2@sha256:4a84039bfd156063a4acd8dd0ad42308a93c224da122a563198742161522abc5
 RUN apt-get update && apt-get -y install procps lsof
 RUN addgroup --system appgroup && adduser --system app && adduser app appgroup
+
+# Ensure yt-dlp is up to date
+# renovate: datasource=pip depName=yt-dlp
+ENV YOUTUBE_DL_VERSION=2023.2.17
+RUN python3 -m pip install --upgrade --no-cache-dir --force-reinstall yt-dlp==${YOUTUBE_DL_VERSION}
+
+# Runtime configuration
 WORKDIR /home/app
 USER app
 ENTRYPOINT ["/bin/app"]
+
 # Copy over the compiled binary from the first step
 COPY --from=builder /bin/app /bin/app
 COPY --from=builder /tmp/manifest /tmp/manifest
-# Specify the container's entrypoint as the binary

@@ -12,4 +12,8 @@ module.exports = {
   extends: ['config:base'],
   rebaseWhen: 'conflicted',
   binarySource: 'global',
+  packageRules: {
+    matchPackageNames: ['mikenye/youtube-dl'],
+    versioning: 'loose'
+  }
 };
