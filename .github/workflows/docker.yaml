@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.action != 'closed' && ( github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'docker:pr-image') )
     steps:
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       - uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18 # v2.1.0
       - uses: docker/setup-buildx-action@4b4e9c3e2d4531116a6f8ba8e71fc6e2cb6e6c8c # v2.5.0
       - id: docker_meta
