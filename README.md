@@ -22,9 +22,9 @@
 docker run --rm -i -p 8080:8080 ghcr.io/jnewland/hlstube:latest
 ```
 
-http://localhost:8080/_/http://youtube.com/watch?v=RQA5RcIZlAM
-
-<img width="464" alt="image" src="https://user-images.githubusercontent.com/47/102046052-203f1980-3da0-11eb-9fb9-43b1a481e670.png">
+* watch a video: http://localhost:8080/_/http://youtube.com/watch?v=RQA5RcIZlAM
+* watch a video: http://localhost:8080/RQA5RcIZlAM
+* redirect to a video: http://localhost:8080/r/_/RQA5RcIZlAM
 
 ## Development
 

@@ -22,6 +22,14 @@ func NewM3UTube() *M3UTube {
 }
 
 func (h *M3UTube) handler(w http.ResponseWriter, r *http.Request) {
+	h.playlistHandler(w, r, "/%s")
+}
+
+func (h *M3UTube) redirectHandler(w http.ResponseWriter, r *http.Request) {
+	h.playlistHandler(w, r, "/r/_/%s")
+}
+
+func (h *M3UTube) playlistHandler(w http.ResponseWriter, r *http.Request, format string) {
 	vars := mux.Vars(r)
 
 	playlistJSON, err := exec.Command("yt-dlp", "-j", "--flat-playlist", "-i", vars["_p"]).Output()
@@ -57,7 +65,7 @@ func (h *M3UTube) handler(w http.ResponseWriter, r *http.Request) {
 			// default to http
 			rewrittenURL.Scheme = "http"
 		}
-		rewrittenURL.Path = fmt.Sprintf("/%s", id)
+		rewrittenURL.Path = fmt.Sprintf(format, id)
 
 		io.WriteString(w, rewrittenURL.String())
 		io.WriteString(w, "\n")
